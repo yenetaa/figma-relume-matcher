@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Figma to Relume Matcher</title>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Bridge Figma and Relume Seamlessly</h1>
+        <p>
+            Simply upload a screenshot of any Figma design section. We'll quickly
+            analyse it and identify the closest matching Relume Library wireframe
+            component, ready for you to use.
+        </p>
+
+        <div class="upload-area" id="uploadArea">
+            <input type="file" id="fileInput" accept="image/png, image/jpeg" hidden />
+
+            <label for="fileInput" class="upload-label">
+                <img src="./assets/upload-icon.svg" alt="Upload Icon" width="60" />
+                <span>Click to Upload or Drag Figma Screenshot here</span>
+                <span class="sub-text">Please upload one section image at a time</span>
+            </label>
+
+            <img id="imagePreview" src="#" alt="Image Preview" class="image-preview" hidden />
+        </div>
+
+        <button id="analyseButton" class="analyse-button">
+            Analyse Design
+        </button>
+
+        <div id="resultArea" class="result-area">
+        </div>
+    </div>
+
+
+    <script src="script.js"></script>
+</body>
+
+</html>
