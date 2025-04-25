@@ -105,6 +105,7 @@ def upload_file():
                     print(f"OCR Analysis: Found {text_block_count} text blocks (conf >= {min_ocr_confidence}%).")
                 except Exception as e_ocr: print(f"Error during OCR processing: {e_ocr}")
 
+
                 guessed_dominant_side = "balanced"
                 total_boxes = left_box_count + right_box_count
                 if total_boxes > 0:
@@ -128,14 +129,16 @@ def upload_file():
                     current_score += side_score
 
                     geo_box_score = 0
-                    if min_boxes <= box_count <= max_boxes: geo_box_score = 1
+                    if min_boxes <= box_count <= max_boxes:
+                        geo_box_score = 2
                     current_score += geo_box_score
 
                     ocr_block_score = 0
-                    if min_text_blocks <= text_block_count <= max_text_blocks: ocr_block_score = 2
+                    if min_text_blocks <= text_block_count <= max_text_blocks:
+                        ocr_block_score = 2
                     current_score += ocr_block_score
 
-                    print(f"  - Scoring '{component.get('name')}': Side='{component_side}'(Wt=1, Score={side_score}), GeoBoxRange=[{min_boxes}-{max_boxes}](In={min_boxes <= box_count <= max_boxes}, Wt=1, Score={geo_box_score}), OcrBoxRange=[{min_text_blocks}-{max_text_blocks}](In={min_text_blocks <= text_block_count <= max_text_blocks}, Wt=2, Score={ocr_block_score}). Total Score={current_score}")
+                    print(f"  - Scoring '{component.get('name')}': Side='{component_side}'(Wt=1, Score={side_score}), GeoBoxRange=[{min_boxes}-{max_boxes}](In={min_boxes <= box_count <= max_boxes}, Wt=2, Score={geo_box_score}), OcrBoxRange=[{min_text_blocks}-{max_text_blocks}](In={min_text_blocks <= text_block_count <= max_text_blocks}, Wt=2, Score={ocr_block_score}). Total Score={current_score}")
 
                     if current_score > best_score:
                         best_score = current_score
@@ -147,7 +150,6 @@ def upload_file():
                     print(f"Best Match Found (Score {best_score}): {best_match_component['name']}")
                     match_name = best_match_component['name']; match_link = best_match_component['link']
                 else: print(f"No suitable match found (Best score: {best_score} < Threshold: {min_match_score_threshold})")
-
 
                 analysis_result = {
                      'significant_box_count': box_count,
