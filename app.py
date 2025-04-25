@@ -26,6 +26,98 @@ try:
 except Exception as e:
     print(f"ERROR loading {RELUME_DATA_FILE}: {e}")
 
+
+def find_best_match(components, box_count, text_block_count, guessed_dominant_side):
+    best_match_components = []  # Store all components with the best score
+    best_score = -1
+    min_match_score_threshold = 4  # Increased threshold to ensure better quality matches
+
+    print(f"Matching based on: GeoBox={box_count}, OcrBlocks={text_block_count}, GuessedSide='{guessed_dominant_side}'")
+
+    for component in components:
+        current_score = 0
+        component_side = component.get('dominant_side', 'unknown').lower()
+        min_boxes = component.get('min_boxes', 0)
+        max_boxes = component.get('max_boxes', 1000)
+        min_text_blocks = component.get('min_text_blocks', 0)
+        max_text_blocks = component.get('max_text_blocks', 100)
+        component_type = component.get('layout_type', '').lower()
+
+        # Side alignment score (weight: 2)
+        side_score = 0
+        if guessed_dominant_side == 'balanced' and component_side in ['center', 'balanced']: 
+            side_score = 2
+        elif guessed_dominant_side == component_side:
+            side_score = 2
+            # Extra bonus for exact side match on directional layouts
+            if guessed_dominant_side in ['left', 'right'] and component_side == guessed_dominant_side:
+                side_score += 0.5
+        current_score += side_score
+
+        # Geometric box score (weight: 2)
+        geo_box_score = 0
+        if min_boxes <= box_count <= max_boxes:
+            geo_box_score = 2
+            # Bonus for being closer to the expected range midpoint
+            expected_mid = (min_boxes + max_boxes) / 2
+            if abs(box_count - expected_mid) <= (max_boxes - min_boxes) / 4:
+                geo_box_score += 0.5
+        current_score += geo_box_score
+
+        # OCR block score (weight: 2)
+        ocr_block_score = 0
+        if min_text_blocks <= text_block_count <= max_text_blocks:
+            ocr_block_score = 2
+            # Bonus for being closer to the expected range midpoint
+            expected_mid = (min_text_blocks + max_text_blocks) / 2
+            if abs(text_block_count - expected_mid) <= (max_text_blocks - min_text_blocks) / 4:
+                ocr_block_score += 0.5
+        current_score += ocr_block_score
+
+        # Component type specific adjustments
+        if 'hero' in component_type:
+            if box_count >= 8:  # Heroes typically have more elements
+                current_score += 1
+            if text_block_count >= 2:  # Heroes typically have more text
+                current_score += 0.5
+            # Penalize centered hero sections for left/right layouts
+            if component_side == 'center' and guessed_dominant_side in ['left', 'right']:
+                current_score -= 1
+        elif 'cta' in component_type:
+            if box_count <= 5:  # CTAs typically have fewer elements
+                current_score += 0.5
+            if text_block_count <= 2:  # CTAs typically have less text
+                current_score += 0.5
+
+        print(f"  - Scoring '{component.get('name')}': Side='{component_side}'(Wt=2, Score={side_score}), "
+              f"GeoBoxRange=[{min_boxes}-{max_boxes}](In={min_boxes <= box_count <= max_boxes}, Wt=2, Score={geo_box_score}), "
+              f"OcrBoxRange=[{min_text_blocks}-{max_text_blocks}](In={min_text_blocks <= text_block_count <= max_text_blocks}, "
+              f"Wt=2, Score={ocr_block_score}). Total Score={current_score}")
+
+        # Update best matches
+        if current_score > best_score:
+            best_score = current_score
+            best_match_components = [component]
+        elif current_score == best_score:
+            best_match_components.append(component)
+
+    # No matches found
+    if not best_match_components or best_score < min_match_score_threshold:
+        print(f"No suitable match found (Best score: {best_score} < Threshold: {min_match_score_threshold})")
+        return None
+
+    # If multiple matches with same score, use tiebreakers
+    if len(best_match_components) > 1:
+        # Tiebreaker 1: Prefer components where the box_count is closer to the middle of their range
+        best_match = min(best_match_components, 
+                        key=lambda c: abs(box_count - ((c.get('min_boxes', 0) + c.get('max_boxes', 1000)) / 2)))
+    else:
+        best_match = best_match_components[0]
+
+    print(f"Final Best Match (Score {best_score}): {best_match['name']}")
+    return best_match
+
+
 @app.route('/')
 def hello_world():
     return 'Hello, World! Backend is running.'
@@ -112,44 +204,21 @@ def upload_file():
                     left_ratio = left_box_count / total_boxes
                     if left_ratio > 0.65: guessed_dominant_side = "left"
                     elif left_ratio < 0.35: guessed_dominant_side = "right"
-                print(f"Guessed dominant side: {guessed_dominant_side}")
 
-                best_match_component = None; best_score = -1
-                for component in relume_components:
-                    current_score = 0
-                    component_side = component.get('dominant_side', 'unknown').lower()
-                    min_boxes = component.get('min_boxes', 0)
-                    max_boxes = component.get('max_boxes', 1000)
-                    min_text_blocks = component.get('min_text_blocks', 0)
-                    max_text_blocks = component.get('max_text_blocks', 100)
 
-                    side_score = 0
-                    if guessed_dominant_side == 'balanced' and component_side in ['center', 'balanced']: side_score = 1
-                    elif guessed_dominant_side == component_side: side_score = 1
-                    current_score += side_score
+                match_info = find_best_match(
+                    relume_components,
+                    box_count,
+                    text_block_count,
+                    guessed_dominant_side
+                )
 
-                    geo_box_score = 0
-                    if min_boxes <= box_count <= max_boxes:
-                        geo_box_score = 2
-                    current_score += geo_box_score
 
-                    ocr_block_score = 0
-                    if min_text_blocks <= text_block_count <= max_text_blocks:
-                        ocr_block_score = 2
-                    current_score += ocr_block_score
-
-                    print(f"  - Scoring '{component.get('name')}': Side='{component_side}'(Wt=1, Score={side_score}), GeoBoxRange=[{min_boxes}-{max_boxes}](In={min_boxes <= box_count <= max_boxes}, Wt=2, Score={geo_box_score}), OcrBoxRange=[{min_text_blocks}-{max_text_blocks}](In={min_text_blocks <= text_block_count <= max_text_blocks}, Wt=2, Score={ocr_block_score}). Total Score={current_score}")
-
-                    if current_score > best_score:
-                        best_score = current_score
-                        best_match_component = component
-
-                match_name = "No suitable match found"; match_link = "#"
-                min_match_score_threshold = 1
-                if best_match_component and best_score >= min_match_score_threshold:
-                    print(f"Best Match Found (Score {best_score}): {best_match_component['name']}")
-                    match_name = best_match_component['name']; match_link = best_match_component['link']
-                else: print(f"No suitable match found (Best score: {best_score} < Threshold: {min_match_score_threshold})")
+                match_name = "No suitable match found"
+                match_link = "#"
+                if match_info:
+                    match_name = match_info.get('name', match_name)
+                    match_link = match_info.get('link', match_link)
 
                 analysis_result = {
                      'significant_box_count': box_count,
