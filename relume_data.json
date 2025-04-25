@@ -7,6 +7,8 @@
       "dominant_side": "left",
       "min_boxes": 8,
       "max_boxes": 30,
+      "min_text_blocks": 1,
+      "max_text_blocks": 4,
       "notes": "Expect more boxes on left. Total count varies."
     },
     {
@@ -17,6 +19,8 @@
       "dominant_side": "right",
       "min_boxes": 8,
       "max_boxes": 30,
+      "min_text_blocks": 1,
+      "max_text_blocks": 4,
       "notes": "Expect more boxes on right. Total count varies."
     },
     {
@@ -27,6 +31,8 @@
       "dominant_side": "center",
       "min_boxes": 5,
       "max_boxes": 25,
+      "min_text_blocks": 1,
+      "max_text_blocks": 4,
       "notes": "Balanced L/R count. Count might be lower if simple."
     },
     {
@@ -37,6 +43,8 @@
       "dominant_side": "balanced",
       "min_boxes": 15,
       "max_boxes": 50,
+      "min_text_blocks": 6,
+      "max_text_blocks": 20,
       "notes": "Likely balanced, potentially higher box count due to columns."
     },
     {
@@ -47,6 +55,8 @@
       "dominant_side": "center",
       "min_boxes": 3,
       "max_boxes": 15,
+      "min_text_blocks": 1,
+      "max_text_blocks": 4,
       "notes": "Often simpler, fewer elements than hero, balanced L/R."
     }
   ]
