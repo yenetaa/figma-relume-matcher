@@ -1,0 +1,52 @@
+[
+    {
+      "id": "hero-TL-IR-1",
+      "name": "Hero - Text Left, Image Right (Layout 1)",
+      "link": "#placeholder-link-hero-tlir",
+      "layout_type": "Text_Left_Image_Right",
+      "dominant_side": "left",
+      "min_boxes": 8,
+      "max_boxes": 30,
+      "notes": "Expect more boxes on left. Total count varies."
+    },
+    {
+      "id": "hero-TR-IL-1",
+      "name": "Hero - Text Right, Image Left (Layout 1)",
+      "link": "#placeholder-link-hero-tril",
+      "layout_type": "Text_Right_Image_Left",
+      "dominant_side": "right",
+      "min_boxes": 8,
+      "max_boxes": 30,
+      "notes": "Expect more boxes on right. Total count varies."
+    },
+    {
+      "id": "hero-centered-1",
+      "name": "Hero - Centered Text (Layout 1)",
+      "link": "#placeholder-link-hero-center",
+      "layout_type": "Centered_Text_Only",
+      "dominant_side": "center",
+      "min_boxes": 5,
+      "max_boxes": 25,
+      "notes": "Balanced L/R count. Count might be lower if simple."
+    },
+    {
+      "id": "feature-3col-1",
+      "name": "Feature Section - 3 Columns (Layout 1)",
+      "link": "#placeholder-link-feat-3col",
+      "layout_type": "Feature_Grid_3_Col",
+      "dominant_side": "balanced",
+      "min_boxes": 15,
+      "max_boxes": 50,
+      "notes": "Likely balanced, potentially higher box count due to columns."
+    },
+    {
+      "id": "cta-centered-1",
+      "name": "CTA - Centered (Layout 1)",
+      "link": "#placeholder-link-cta-center",
+      "layout_type": "Centered_Text_Only",
+      "dominant_side": "center",
+      "min_boxes": 3,
+      "max_boxes": 15,
+      "notes": "Often simpler, fewer elements than hero, balanced L/R."
+    }
+  ]

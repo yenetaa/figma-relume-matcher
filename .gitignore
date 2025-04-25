@@ -1,0 +1,13 @@
+# Python Virtual Environment
+venv/
+
+# User Uploads
+uploads/
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+
+# OS-specific files
+.DS_Store
